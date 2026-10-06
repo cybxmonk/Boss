@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Ops // Message Board</title>
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --border-color: rgba(56, 189, 248, 0.2);
+      --border-glow: rgba(56, 189, 248, 0.4);
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-purple: #818cf8;
+      --accent-green: #34d399;
+      --accent-red: #f87171;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --danger-border: rgba(239, 68, 68, 0.35);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Code", monospace, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(129, 140, 248, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.1);
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .container:hover {
+      border-color: var(--border-glow);
+    }
+
+    .header-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .content-area {
+      padding: 2rem;
+    }
+
+    .title-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .title-group h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .title-group p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .input-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-cyan);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .input-label span.hint {
+      color: var(--text-muted);
+      font-weight: 400;
+      text-transform: none;
+      font-size: 0.75rem;
+    }
+
+    .input-field {
+      width: 100%;
+      min-height: 90px;
+      padding: 0.85rem 1rem;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .input-field::placeholder {
+      color: rgba(148, 163, 184, 0.5);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem 1.25rem;
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    .board-section {
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .board-header {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .rendered-display {
+      min-height: 70px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      word-break: break-word;
+      transition: border-color 0.2s ease;
+    }
+
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 0.75rem 0;
+    }
+
+    /* Secret Administrative Panel - Hidden by default */
+    #classified-vault {
+      display: none;
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: 10px;
+      color: #fecaca;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .vault-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #f87171;
+    }
+
+    .vault-badge {
+      background: rgba(239, 68, 68, 0.2);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .secret-key-wrapper {
+      font-family: "Fira Code", Consolas, Monaco, monospace;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 0.25rem;
+      letter-spacing: 0.05em;
+      user-select: all;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    @media (max-width: 480px) {
+      .content-area {
+        padding: 1.5rem;
+      }
+      .title-group h1 {
+        font-size: 1.45rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header-strip">
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Terminal Node // Active</span>
+      </div>
+      <div>Renderer: Dynamic Markup v1.4</div>
+    </div>
+
+    <div class="content-area">
+      <div class="title-group">
+        <h1>Message Board</h1>
+        <p>Post announcements to the broadcast terminal. The engine interprets submitted text with dynamic inline rendering enabled.</p>
+      </div>
+
+      <form id="messageForm" onsubmit="event.preventDefault(); postMessage();">
+        <div class="form-group">
+          <div class="input-label">
+            <span>Broadcast Payload</span>
+            <span class="hint">Supports formatting markup</span>
+          </div>
+          <textarea 
+            id="messageInput" 
+            class="input-field" 
+            placeholder="Type a message or formatting tags to broadcast..." 
+            autocomplete="off"
+            spellcheck="false"
+            required></textarea>
+          <button type="submit" class="btn-submit">
+            <span>Submit Message</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="board-section">
+        <div class="board-header">
+          <span>Live Display</span>
+          <span id="timestamp">No broadcasts yet</span>
+        </div>
+        <div id="outputDisplay" class="rendered-display">
+          <div class="empty-state">Submitted messages will be dynamically rendered here.</div>
+        </div>
+
+        <!-- System Administrative Buffer -->
+        <div id="classified-vault" class="classified-panel">
+          <div class="vault-header">
+            <span>Administrative Archive Record</span>
+            <span class="vault-badge">Restricted</span>
+          </div>
+          <div style="font-size: 0.8rem; margin-bottom: 0.4rem; color: #fca5a5;">
+            CONFIDENTIAL RECOVERY TOKEN:
+          </div>
+          <div class="secret-key-wrapper" id="secretKey"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Broadcast Pipeline &bull; Raw Markup Interceptor Enabled
+  </div>
+
+  <script>
+    // System token repository
+    const _secData = ["QnIwc2FkMWszM3tUZXJhX0JoYWl9"];
+
+    // Initialize secret into administrative node
+    (function initBuffer() {
+      const target = document.getElementById("secretKey");
+      if (target && _secData.length > 0) {
+        target.textContent = atob(_secData[0]);
+      }
+    })();
+
+    // Process and dynamically render submitted message
+    function postMessage() {
+      const input = document.getElementById("messageInput");
+      const output = document.getElementById("outputDisplay");
+      const timestamp = document.getElementById("timestamp");
+
+      if (!input || !output) return;
+
+      const content = input.value;
+      if (content.trim() === "") return;
+
+      // Dynamic markup rendering
+      output.innerHTML = content;
+
+      // Update timestamp
+      const now = new Date();
+      if (timestamp) {
+        timestamp.textContent = "Last updated: " + now.toLocaleTimeString();
+      }
+    }
+  </script>
+</body>
+</html>
+
